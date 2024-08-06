@@ -1,40 +1,34 @@
 #!/usr/bin/python3
-"""
-reads stdin line by line and computes metrics
-"""
 import sys
+import os
 
-file_size = 0
-status_tally = {"200": 0, "301": 0, "400": 0, "401": 0,
-                "403": 0, "404": 0, "405": 0, "500": 0}
-i = 0
-try:
-    for line in sys.stdin:
-        tokens = line.split()
-        if len(tokens) >= 2:
-            a = i
-            if tokens[-2] in status_tally:
-                status_tally[tokens[-2]] += 1
-                i += 1
-            try:
-                file_size += int(tokens[-1])
-                if a == i:
-                    i += 1
-            except:
-                if a == i:
-                    continue
-        if i % 10 == 0:
-            print("File size: {:d}".format(file_size))
-            for key, value in sorted(status_tally.items()):
-                if value:
-                    print("{:s}: {:d}".format(key, value))
-    print("File size: {:d}".format(file_size))
-    for key, value in sorted(status_tally.items()):
-        if value:
-            print("{:s}: {:d}".format(key, value))
+import json
 
-except KeyboardInterrupt:
-    print("File size: {:d}".format(file_size))
-    for key, value in sorted(status_tally.items()):
-        if value:
-            print("{:s}: {:d}".format(key, value))
+def load_from_json_file(filename):
+    """Loads a Python object from a file using JSON representation."""
+    with open(filename, 'r') as f:
+        return json.load(f)
+import json
+
+def save_to_json_file(my_obj, filename):
+    """Saves a Python object to a file using JSON representation."""
+    with open(filename, 'w') as f:
+        json.dump(my_obj, f)
+
+# Import the necessary functions
+save_to_json_file = __import__('5-save_to_json_file').save_to_json_file
+load_from_json_file = __import__('6-load_from_json_file').load_from_json_file
+
+filename = "add_item.json"
+
+# Load the existing data if the file exists, otherwise create an empty list
+if os.path.exists(filename):
+    items = load_from_json_file(filename)
+else:
+    items = []
+
+# Add all arguments to the list
+items.extend(sys.argv[1:])
+
+# Save the updated list back to the file
+save_to_json_file(items, filename)
